@@ -6,10 +6,46 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  username String
+  email String @unique
+  password String
+  confirmPassword String
+  cretedAt DateTime @default(now())
+
+  reviews Reviews[]
+}
+
+model Beach {
+  place_Id String @id @unique
+  name String
+  description String
+  reviews Int
+  rating Float
+  featured_image String
+  address String
+  review_keywords String
+  link String
+  coordinates String
+
+  reviewList      Reviews[] @relation("BeachReviews")
+}
+
+model Reviews {
+  placeId String   @id @unique
+  userId String
+  rating Float
+  review_text String
+  average_sentiment String
+
+  beach           Beach     @relation("BeachReviews", fields: [placeId], references: [place_Id])
+   user             User     @relation(fields: [userId], references: [id])
 }
