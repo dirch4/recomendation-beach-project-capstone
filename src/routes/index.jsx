@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Homepage from '../components/pages/Homepage';
 import Signin from '../auth/SignIn';
 import Signup from '../auth/SignUp';
+import Profile from '../components/pages/Profilepage';
 import Search from '../components/pages/Searchpage';
 import Navbar from '../components/layouts/Navbar';
 import DetailPage from '../components/pages/Detailpage';
@@ -27,12 +28,16 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
+    path: '/profile',
+    element: <Profile />,
+  },
+  {
     path: '/search',
-    element: <Layout><Search /></Layout>,
+    element: <Layout><Search/></Layout>,
   },
   {
     path: '/detail/:placeId',
-    element: <Layout><DetailPage /></Layout>,
+    element: <Layout><DetailPage/></Layout>,
   }
 ]);
 

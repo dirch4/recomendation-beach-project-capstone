@@ -8,10 +8,25 @@ const Spinner = () => (
   </div>
 );
 
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+  const toRad = (value) => (value * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 const SearchPage = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialKeyword = queryParams.get('keyword') || '';
+  const isNearby = queryParams.get('nearby') === 'true';
+  const userLat = parseFloat(queryParams.get('lat'));
+  const userLon = parseFloat(queryParams.get('lon'));
 
   const [searchTerm, setSearchTerm] = useState(initialKeyword);
   const [debouncedTerm, setDebouncedTerm] = useState(initialKeyword);
@@ -19,7 +34,7 @@ const SearchPage = () => {
   const [minRating, setMinRating] = useState(0);
   const [showAllTags, setShowAllTags] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [displayCount, setDisplayCount] = useState(6); // State untuk jumlah data yang ditampilkan
+  const [displayCount, setDisplayCount] = useState(6);
 
   useEffect(() => {
     setIsLoading(true);
@@ -37,22 +52,9 @@ const SearchPage = () => {
     };
   }, [searchTerm]);
 
-  // Reset display count ketika search term berubah
   useEffect(() => {
     setDisplayCount(6);
-  }, [debouncedTerm, selectedTags]);
-
-  const keywordFiltered = debouncedTerm.trim()
-    ? cleaned_data.filter((place) => {
-        const keyword = debouncedTerm.toLowerCase();
-        return (
-          (place.name?.toLowerCase().includes(keyword) ||
-            place.address?.toLowerCase().includes(keyword) ||
-            place.description?.toLowerCase().includes(keyword)) &&
-          place.rating >= minRating
-        );
-      })
-    : [];
+  }, [debouncedTerm, selectedTags, minRating]);
 
   const allTags = Array.from(
     new Set(
@@ -62,13 +64,41 @@ const SearchPage = () => {
     )
   );
 
-  const tagFiltered = selectedTags.length
-    ? cleaned_data.filter((place) =>
-        selectedTags.every((tag) =>
-          place.review_keywords?.toLowerCase().includes(tag.toLowerCase())
-        )
-      )
-    : [];
+  const filterPlaces = () => {
+    const filtered = cleaned_data.filter((place) => {
+      const matchesKeyword = debouncedTerm
+        ? place.name?.toLowerCase().includes(debouncedTerm.toLowerCase()) ||
+          place.address?.toLowerCase().includes(debouncedTerm.toLowerCase()) ||
+          place.description?.toLowerCase().includes(debouncedTerm.toLowerCase())
+        : true;
+
+      const matchesRating = place.rating >= minRating;
+
+      const matchesTags = selectedTags.length
+        ? selectedTags.every((tag) =>
+            place.review_keywords?.toLowerCase().includes(tag.toLowerCase())
+          )
+        : true;
+
+      return matchesKeyword && matchesRating && matchesTags;
+    });
+
+    if (isNearby && userLat && userLon) {
+      return filtered
+        .filter((place) => place.latitude && place.longitude)
+        .map((place) => ({
+          ...place,
+          distance: haversineDistance(userLat, userLon, place.latitude, place.longitude),
+        }))
+        .sort((a, b) => a.distance - b.distance);
+    }
+
+    return filtered;
+  };
+
+  const results = filterPlaces();
+  const displayedResults = results.slice(0, displayCount);
+  const hasMoreResults = displayCount < results.length;
 
   const toggleTag = (tag) => {
     const tagLower = tag.toLowerCase();
@@ -84,36 +114,26 @@ const SearchPage = () => {
     setSelectedTags([]);
   };
 
-  // Fungsi untuk menambah jumlah data yang ditampilkan
   const loadMore = () => {
-    setDisplayCount(prevCount => prevCount + 6);
+    setDisplayCount((prev) => prev + 6);
   };
 
-  // Data yang akan ditampilkan (hanya sesuai displayCount)
-  const displayedKeywordResults = keywordFiltered.slice(0, displayCount);
-  const displayedTagResults = tagFiltered.slice(0, displayCount);
-
-  // Cek apakah masih ada data yang belum ditampilkan
-  const hasMoreKeywordResults = displayCount < keywordFiltered.length;
-  const hasMoreTagResults = displayCount < tagFiltered.length;
-
   return (
-    <div className="px-4 md:px-6 lg:px-8 py-6 bg-gray-50 min-h-screen max-w-screen-xl mx-auto">
+    <div className="px-4 md:px-6 lg:px-8 py-6 max-h-screen max-w-screen-lg mx-auto">
       <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6">
-        {debouncedTerm ? (
-          <>
-            Menampilkan hasil untuk <span className="text-blue-600">"{debouncedTerm}"</span>
-          </>
+        {isNearby && !debouncedTerm ? (
+          <>Showing destinations near your location</>
+        ) : debouncedTerm ? (
+          <>Showing results for <span className="text-blue-600">"{debouncedTerm}"</span></>
         ) : (
-          <>Jelajahi destinasi dengan memilih tag di bawah ini</>
+          <>Explore destinations by selecting tags below</>
         )}
       </h1>
 
-      {/* Search Input & Filter */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <input
           type="text"
-          placeholder="Cari pantai atau lokasi..."
+          placeholder="Search for beach or location..."
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -126,14 +146,13 @@ const SearchPage = () => {
           onChange={(e) => setMinRating(Number(e.target.value))}
           className="p-3 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
         >
-          <option value={0}>Rating berapa saja</option>
-          <option value={4}>Minimal 4.0</option>
-          <option value={4.5}>Minimal 4.5</option>
+          <option value={0}>Any rating</option>
+          <option value={4}>Minimum 4.0</option>
+          <option value={4.5}>Minimum 4.5</option>
         </select>
       </div>
 
-      {/* Tags */}
-      {searchTerm.trim() === '' && (
+      {!debouncedTerm && !isNearby && (
         <div className="flex flex-col gap-2 mb-6">
           <div className="flex flex-wrap gap-2">
             {(showAllTags ? allTags : allTags.slice(0, 15)).map((tag) => (
@@ -151,86 +170,59 @@ const SearchPage = () => {
               onClick={() => setShowAllTags(!showAllTags)}
               className="text-blue-600 text-sm mt-1 hover:underline self-start"
             >
-              {showAllTags ? 'Tampilkan Lebih Sedikit' : 'Tag Selengkapnya'}
+              {showAllTags ? 'Show Fewer Tags' : 'Show More Tags'}
             </button>
           )}
         </div>
       )}
 
-      {/* Loading Spinner */}
       {isLoading ? (
         <Spinner />
-      ) : debouncedTerm && displayedKeywordResults.length > 0 ? (
+      ) : displayedResults.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {displayedKeywordResults.map((place) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {displayedResults.map((place) => (
               <Card key={place.place_id} place={place} />
             ))}
           </div>
-          {hasMoreKeywordResults && (
+          {hasMoreResults && (
             <div className="flex justify-center mt-6">
               <button
                 onClick={loadMore}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition"
+                className="text-sky-200 bg-sky-800 px-4 py-1 rounded hover:bg-sky-200 hover:text-sky-800"
               >
-                Tampilkan Lebih Banyak
+                Show More
               </button>
             </div>
           )}
         </>
-      ) : debouncedTerm && keywordFiltered.length === 0 ? (
+      ) : (
         <p className="text-gray-600 text-center mt-10 text-base">
-          Tidak ditemukan hasil untuk <strong>{debouncedTerm}</strong>.
+          No results found for your search.
         </p>
-      ) : null}
-
-      {!debouncedTerm && selectedTags.length > 0 && displayedTagResults.length > 0 && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {displayedTagResults.map((place) => (
-              <Card key={place.place_id} place={place} />
-            ))}
-          </div>
-          {hasMoreTagResults && (
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={loadMore}
-                className="bg-sky-800 text-white px-6 py-2 rounded-md hover:bg-sky-500 transition"
-              >
-                Tampilkan Lebih Banyak
-              </button>
-            </div>
-          )}
-        </>
       )}
     </div>
   );
 };
 
-// Card component tetap sama
 const Card = ({ place }) => (
-  <div className="flex flex-col lg:flex-row bg-white rounded-2xl shadow-md overflow-hidden transition-transform hover:scale-[1.01] hover:shadow-lg h-full">
-    {/* Gambar */}
-    <div className="w-full lg:w-1/2 h-64 lg:h-auto">
+  <div className="flex flex-col lg:flex-row bg-gradient-to-b from-[#dcefff] to-white rounded-xl shadow-xl overflow-hidden transition-transform hover:scale-[1.01] hover:shadow-lg h-full border border-sky-950 ">
+    <div className="w-full lg:w-2/5 h-48 lg:h-auto">
       <img
         src={place.featured_image}
         alt={place.name}
         onError={(e) => (e.target.src = '/fallback-image.jpg')}
-        className="object-cover w-full h-full lg:h-full"
+        className="object-cover w-full h-full"
       />
     </div>
-
-    {/* Konten */}
-    <div className="w-full lg:w-1/2 flex flex-col justify-between bg-sky-50 p-4 md:p-6 h-full">
+    <div className="w-full lg:w-3/5 flex flex-col justify-between bg-sky-50 p-4 md:p-5 h-full">
       <div className="flex-1">
-        <h2 className="text-lg md:text-xl font-bold text-sky-800 mb-2">{place.name}</h2>
-        <p className="text-sm md:text-base text-gray-700 mb-3 line-clamp-3">
-          {place.description && place.description !== '-'
-            ? place.description
-            : 'Belum ada deskripsi tersedia.'}
+        <h2 className="text-lg md:text-xl font-bold text-sky-800 mb-2 line-clamp-1">{place.name}</h2>
+        <p className="text-sm md:text-base text-gray-700 mb-3 line-clamp-2">
+          {place.description && place.description !== '-' ? place.description : 'No description available.'}
         </p>
         <p className="text-sm md:text-base text-yellow-600 mb-2">
-          ⭐ {place.rating} ({place.reviews.toLocaleString()} ulasan)
+          ⭐ {place.rating} ({place.reviews.toLocaleString()} reviews)
         </p>
         <div className="flex flex-wrap gap-2 mb-3">
           {place.review_keywords.split(', ').map((keyword, index) => (
@@ -243,10 +235,9 @@ const Card = ({ place }) => (
           ))}
         </div>
         <p className="text-sm text-gray-500 mb-2">
-          <strong>Alamat:</strong> {place.address}
+          <strong>Address:</strong> {place.address}
         </p>
       </div>
-
       <div className="mt-4 flex justify-between items-center">
         <a
           href={place.link}
@@ -254,13 +245,13 @@ const Card = ({ place }) => (
           rel="noopener noreferrer"
           className="text-sky-600 hover:underline text-sm"
         >
-          Lihat di Google Maps
+          View on Google Maps
         </a>
         <a
           href={`/detail/${place.place_id}`}
           className="bg-[#00859D] text-white text-sm px-4 py-2 rounded-md hover:bg-sky-700 transition"
         >
-          Detail
+          Details
         </a>
       </div>
     </div>
