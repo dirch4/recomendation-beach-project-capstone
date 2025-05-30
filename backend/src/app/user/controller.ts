@@ -19,15 +19,6 @@ router.post(
         confirmPassword
       );
 
-      // Opsional: Jika ingin menyimpan token di HTTP-only cookie (lebih aman dari XSS)
-      // Perhatikan: Jika Anda menggunakan cookie, frontend tidak perlu membaca token dari body JSON
-      // res.cookie('jwtToken', result.user.token, {
-      //   httpOnly: true, // Mencegah akses JavaScript dari client
-      //   secure: process.env.NODE_ENV === 'production', // Hanya kirim via HTTPS di produksi
-      //   maxAge: 7 * 24 * 60 * 60 * 1000, // Durasi cookie: 7 hari (dalam milidetik)
-      //   sameSite: 'Lax', // Pengaturan SameSite untuk CSRF protection
-      // });
-
       res.status(201).json({
         message: "User registered successfully",
         user: {
@@ -57,16 +48,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
-
       const result = await userService.loginUser(email, password);
-
-      // Opsional: Jika ingin menyimpan token di HTTP-only cookie
-      // res.cookie('jwtToken', result.user.token, {
-      //   httpOnly: true,
-      //   secure: process.env.NODE_ENV === 'production',
-      //   maxAge: 7 * 24 * 60 * 60 * 1000,
-      //   sameSite: 'Lax',
-      // });
 
       res.json(result);
     } catch (error) {
