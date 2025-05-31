@@ -10,6 +10,22 @@ type SelectedBeachDetails = {
   rating: number;
 };
 
+type BeachQueryResult = {
+  place_Id: string;
+  name: string;
+  description: string | null;
+  reviews: number;
+  rating: number;
+  featured_image: string | null;
+  address: string | null;
+  review_keywords: string | null;
+  link: string | null;
+  coordinates: string | null;
+  positiveSentimentCount: number;
+  negativeSentimentCount: number;
+  neutralSentimentCount: number;
+};
+
 const prisma = new PrismaClient();
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:5001";
@@ -162,6 +178,113 @@ export const getBeachRecommendations = async (
   }
 
   return recommendations;
+};
+
+export const searchBeaches = async (
+  keyword: string,
+  limit: number,
+  page: number
+): Promise<BeachDetail[]> => {
+  const skip = (page - 1) * limit;
+
+  const whereClause: any = {};
+  if (keyword) {
+    whereClause.OR = [
+      {
+        name: {
+          contains: keyword,
+          mode: "insensitive", // Untuk pencarian case-insensitive
+        },
+      },
+      {
+        description: {
+          contains: keyword,
+          mode: "insensitive",
+        },
+      },
+      // Anda bisa menambahkan kolom lain untuk pencarian, misalnya review_keywords
+      // {
+      //   review_keywords: {
+      //     contains: keyword,
+      //     mode: 'insensitive'
+      //   }
+      // }
+    ];
+  }
+
+  const beaches = await prisma.beach.findMany({
+    where: whereClause,
+    take: limit,
+    skip: skip,
+    orderBy: {
+      rating: "desc", // Urutkan berdasarkan rating secara default
+    },
+    select: {
+      // Pilih kolom yang ingin Anda tampilkan
+      place_Id: true,
+      name: true,
+      description: true,
+      reviews: true,
+      rating: true,
+      featured_image: true,
+      address: true,
+      review_keywords: true,
+      link: true,
+      coordinates: true,
+      positiveSentimentCount: true,
+      negativeSentimentCount: true,
+      neutralSentimentCount: true,
+    },
+  });
+
+  return beaches.map((beach: BeachQueryResult) => {
+    const totalSentimentCount =
+      beach.positiveSentimentCount +
+      beach.negativeSentimentCount +
+      beach.neutralSentimentCount;
+    const sentimentSummary = {
+      positive:
+        totalSentimentCount > 0
+          ? parseFloat(
+              (
+                (beach.positiveSentimentCount / totalSentimentCount) *
+                100
+              ).toFixed(2)
+            )
+          : 0,
+      negative:
+        totalSentimentCount > 0
+          ? parseFloat(
+              (
+                (beach.negativeSentimentCount / totalSentimentCount) *
+                100
+              ).toFixed(2)
+            )
+          : 0,
+      neutral:
+        totalSentimentCount > 0
+          ? parseFloat(
+              (
+                (beach.neutralSentimentCount / totalSentimentCount) *
+                100
+              ).toFixed(2)
+            )
+          : 0,
+    };
+    return {
+      placeId: beach.place_Id,
+      name: beach.name,
+      description: beach.description,
+      rating: beach.rating,
+      reviews: beach.reviews,
+      sentimentSummary: sentimentSummary,
+      featured_image: beach.featured_image,
+      address: beach.address,
+      review_keywords: beach.review_keywords,
+      link: beach.link,
+      coordinates: beach.coordinates,
+    };
+  });
 };
 
 export const getBeachDetails = async (

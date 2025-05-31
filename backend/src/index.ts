@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import userController from "./app/user/controller";
-import reviewController from "./app/review/controller"; // Import reviewController
+import beachAndReviewController from "./app/review & beach/controller"; // Import reviewController
 import { authenticateJWT } from "./middleware/auth";
 import { errorHandler } from "./app/error/errorHandler";
 
@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 
 app.use("/user", userController);
-app.use("/api", authenticateJWT, reviewController); // Semua rute /api memerlukan JWT
+app.use("/api", authenticateJWT, beachAndReviewController); // Semua rute /api memerlukan JWT
 
 app.get("/protected-route", authenticateJWT, (req: Request, res: Response) => {
   res.json({

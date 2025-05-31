@@ -110,4 +110,31 @@ router.get(
   }
 );
 
+router.get(
+  "/beaches",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const searchQuery = req.query.search as string; // Ambil kata kunci pencarian dari query parameter
+      const limit = parseInt(req.query.limit as string) || 10; // Default 10 hasil
+      const page = parseInt(req.query.page as string) || 1; // Default halaman 1
+
+      const beaches = await reviewService.searchBeaches(
+        searchQuery,
+        limit,
+        page
+      );
+
+      res.json({
+        message: "Beaches retrieved successfully",
+        count: beaches.length,
+        page: page,
+        limit: limit,
+        data: beaches,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;
