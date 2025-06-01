@@ -1,7 +1,10 @@
+// src/app/user/service.ts
+
 import { PrismaClient } from "@prisma/client";
 import { BadRequestError } from "../../error/BadRequestError";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../../utils/jwt";
+import { UpdateUsernameDTO, UpdatePasswordDTO } from "./dto"; // Import DTOs baru
 
 const prisma = new PrismaClient();
 
@@ -50,8 +53,7 @@ export const loginUser = async (email: string, password: string) => {
   if (!user) throw new BadRequestError("Invalid credentials: User not found");
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid)
-    throw new BadRequestError("Invalid credentials: Incorrect password");
+  if (!isPasswordValid) throw new BadRequestError("Invalid password");
 
   const token = generateToken(user.id);
 
@@ -63,4 +65,64 @@ export const loginUser = async (email: string, password: string) => {
       token,
     },
   };
+};
+
+// Fungsi baru: Update Username
+export const updateUsername = async (
+  userId: string,
+  data: UpdateUsernameDTO
+) => {
+  const { newUsername } = data;
+
+  // Pastikan username baru belum digunakan oleh user lain
+  const existingUserWithNewUsername = await prisma.user.findUnique({
+    where: { username: newUsername },
+  });
+
+  if (
+    existingUserWithNewUsername &&
+    existingUserWithNewUsername.id !== userId
+  ) {
+    throw new BadRequestError("Username already taken by another user.");
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { username: newUsername },
+    select: { id: true, username: true, email: true }, // Pilih field yang ingin dikembalikan
+  });
+
+  return updatedUser;
+};
+
+// Fungsi baru: Update Password
+export const updatePassword = async (
+  userId: string,
+  data: UpdatePasswordDTO
+) => {
+  const { oldPassword, newPassword, confirmNewPassword } = data;
+
+  if (newPassword !== confirmNewPassword) {
+    throw new BadRequestError("New password and confirmation do not match.");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new BadRequestError("User not found."); // Seharusnya tidak terjadi karena authenticated
+  }
+
+  const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+  if (!isOldPasswordValid) {
+    throw new BadRequestError("Old password is incorrect.");
+  }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedNewPassword },
+    select: { id: true, username: true, email: true }, // Pilih field yang ingin dikembalikan
+  });
+
+  return updatedUser;
 };

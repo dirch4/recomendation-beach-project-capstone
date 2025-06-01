@@ -3,3 +3,14 @@ export interface UserDTO {
   email: string;
   password: string;
 }
+
+export interface UpdateUsernameDTO {
+  newUsername: string;
+}
+
+// DTO untuk pembaruan password
+export interface UpdatePasswordDTO {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}

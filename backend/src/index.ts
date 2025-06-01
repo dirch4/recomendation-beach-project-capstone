@@ -1,27 +1,30 @@
 import dotenv from "dotenv";
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import userController from "./app/user/controller";
-import beachAndReviewController from "./app/review & beach/controller"; // Import reviewController
-import { authenticateJWT } from "./middleware/auth";
-import { errorHandler } from "./app/error/errorHandler";
+import reviewController from "./app/review/controller";
+import beachController from "./app/beach/controller";
+import { logger } from "./middleware/logger";
+import { errorHandler } from "./middleware/error";
+import cors from "cors";
 
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
-
 app.use("/user", userController);
-app.use("/api", authenticateJWT, beachAndReviewController); // Semua rute /api memerlukan JWT
+app.use("/review", reviewController);
+app.use("/beach", beachController);
 
-app.get("/protected-route", authenticateJWT, (req: Request, res: Response) => {
-  res.json({
-    message: "Anda berhasil mengakses rute terproteksi!",
-    userId: req.user?.id,
-    timestamp: new Date().toISOString(),
-  });
-});
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
+app.use(express.json());
+app.use(logger);
 app.use(errorHandler);
 
 app.listen(PORT, () =>
