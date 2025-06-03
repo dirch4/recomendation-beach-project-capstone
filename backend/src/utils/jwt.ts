@@ -1,15 +1,16 @@
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-const SECRET_KEY = (process.env.JWT_SECRET as string) || "secretkey";
-const EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
+const SECRET_KEY = process.env.JWT_SECRET || "supersecretjwtkey"; // Pastikan sesuai dengan di auth.ts
 
 export const generateToken = (userId: string): string => {
-  return jwt.sign(
-    { id: userId },
-    SECRET_KEY as jwt.Secret,
-    { expiresIn: EXPIRES_IN } as jwt.SignOptions
-  );
+  return jwt.sign({ id: userId }, SECRET_KEY, { expiresIn: "1h" }); // Token berlaku 1 jam
+};
+
+export const verifyToken = (token: string): { id: string } | null => {
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY) as { id: string };
+    return decoded;
+  } catch (error) {
+    return null;
+  }
 };
