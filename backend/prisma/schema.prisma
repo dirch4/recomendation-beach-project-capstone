@@ -1,9 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,38 +9,48 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  username String
-  email String @unique
-  password String
-  confirmPassword String
-  cretedAt DateTime @default(now())
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())  // <--- Tambahkan @default(now()) di sini
 
   reviews Reviews[]
 }
 
 model Beach {
-  place_Id String @id @unique
-  name String
-  description String
-  reviews Int
-  rating Float
-  featured_image String
-  address String
-  review_keywords String
-  link String
-  coordinates String
+  place_Id        String    @id @unique
+  name            String
+  description     String?
+  reviews         Int       @default(0)
+  rating          Float     @default(0.0)
+  featured_image  String?
+  address         String?
+  review_keywords String?
+  link            String?
+  coordinates     String?
 
-  reviewList      Reviews[] @relation("BeachReviews")
+  positiveSentimentCount Int @default(0)
+  negativeSentimentCount Int @default(0)
+  neutralSentimentCount  Int @default(0)
+
+  reviewList Reviews[] @relation("BeachReviews")
 }
 
 model Reviews {
-  placeId String   @id @unique
-  userId String
-  rating Float
+  id          String   @id @default(uuid())
   review_text String
+  rating      Float
   average_sentiment String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  beach           Beach     @relation("BeachReviews", fields: [placeId], references: [place_Id])
-   user             User     @relation(fields: [userId], references: [id])
+  placeId String
+  userId  String
+
+  beach Beach @relation("BeachReviews", fields: [placeId], references: [place_Id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([placeId, userId])
 }
