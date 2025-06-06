@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 async function importBeaches() {
   try {
-    const dataPath = path.join(__dirname, "../cleaned_data.json");
+    const dataPath = path.join(__dirname, "../data_forDB_pretty.json");
     const jsonData = fs.readFileSync(dataPath, "utf-8");
     const beaches = JSON.parse(jsonData);
 
