@@ -1,8 +1,12 @@
+import { StarRating } from '../atoms/StarRating';
+import { Button } from '../atoms/Button';
+import { toast } from 'react-toastify';
 import { ImageCarousel } from '../organism/ImageCarousel';
-import { PlaceMap } from '../organism/PlaceMap';
+import {PlaceMap} from '../organism/PlaceMap'
 import { ReviewsSection } from '../organism/ReviewSection';
+import {ReviewForm} from "../layouts/ReviewForm"
 import { RecommendationSlider } from '../organism/RecomendationSlider';
-import { ReviewForm } from '../layouts/ReviewForm';
+
 
 export const DetailTemplate = ({
   place,
@@ -72,9 +76,16 @@ export const DetailTemplate = ({
 
     {/* Edit Modal */}
     {editModalOpen && selectedReview && (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" onClick={() => setEditModalOpen(false)}>
-        <div className="bg-white p-6 rounded shadow-md w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        onClick={() => setEditModalOpen(false)}
+      >
+        <div
+          className="bg-white p-6 rounded shadow-md w-full max-w-md"
+          onClick={(e) => e.stopPropagation()}
+        >
           <h2 className="text-xl font-semibold mb-4">Edit Review</h2>
+
           <textarea
             className="w-full border p-2 rounded mb-4"
             value={selectedReview.comment}
@@ -82,27 +93,31 @@ export const DetailTemplate = ({
               setSelectedReview({ ...selectedReview, comment: e.target.value })
             }
           />
-          <input
-            type="number"
-            min="1"
-            max="5"
-            className="w-full border p-2 rounded mb-4"
-            value={selectedReview.rating}
-            onChange={(e) =>
-              setSelectedReview({ ...selectedReview, rating: parseInt(e.target.value) })
-            }
+
+          <StarRating
+            rating={selectedReview.rating}
+            onChange={(newRating) => setSelectedReview({ ...selectedReview, rating: newRating })}
           />
-          <div className="flex justify-end gap-3">
-            <button onClick={() => setEditModalOpen(false)} className="text-gray-600">Cancel</button>
+
+          <div className="flex justify-end gap-3 mt-4">
+            <button onClick={() => setEditModalOpen(false)} className="text-gray-600">
+              Cancel
+            </button>
             <button
               onClick={() => {
-                setFeedbacks(prev =>
-                  prev.map(fb =>
+                setFeedbacks((prev) =>
+                  prev.map((fb) =>
                     fb.id === selectedReview.id
-                      ? { ...fb, comment: selectedReview.comment, rating: selectedReview.rating, timestamp: new Date().toISOString() }
+                      ? {
+                          ...fb,
+                          comment: selectedReview.comment,
+                          rating: selectedReview.rating,
+                          timestamp: new Date().toISOString(),
+                        }
                       : fb
                   )
                 );
+                toast.success('Review updated successfully!');
                 setEditModalOpen(false);
                 setSelectedReview(null);
               }}
@@ -117,15 +132,26 @@ export const DetailTemplate = ({
 
     {/* Delete Modal */}
     {deleteModalOpen && selectedReview && (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" onClick={() => setDeleteModalOpen(false)}>
-        <div className="bg-white p-6 rounded shadow-md w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        onClick={() => setDeleteModalOpen(false)}
+      >
+        <div
+          className="bg-white p-6 rounded shadow-md w-full max-w-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
           <h2 className="text-xl font-semibold mb-4">Delete Review</h2>
-          <p>Are you sure you want to delete this review by <b>{selectedReview.name}</b>?</p>
+          <p>
+            Are you sure you want to delete this review by <b>{selectedReview.name}</b>?
+          </p>
           <div className="flex justify-end gap-3 mt-6">
-            <button onClick={() => setDeleteModalOpen(false)} className="text-gray-600">Cancel</button>
+            <button onClick={() => setDeleteModalOpen(false)} className="text-gray-600">
+              Cancel
+            </button>
             <button
               onClick={() => {
-                setFeedbacks(prev => prev.filter(fb => fb.id !== selectedReview.id));
+                setFeedbacks((prev) => prev.filter((fb) => fb.id !== selectedReview.id));
+                toast.success('Review deleted successfully!');
                 setDeleteModalOpen(false);
                 setSelectedReview(null);
               }}

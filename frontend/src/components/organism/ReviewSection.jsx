@@ -22,7 +22,7 @@ export const ReviewsSection = ({ feedbacks, isLoggedIn, user, openDropdownId, se
         1024: { slidesPerView: 3 },
       }}
       onSwiper={(swiper) => (swiperRef.current = swiper)}
-      className="mySwiper cursor-pointer"
+      className="mySwiper cursor-pointer shadow-lg"
     >
       {feedbacks.length === 0 ? (
         <SwiperSlide>

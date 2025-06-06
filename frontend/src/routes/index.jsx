@@ -10,6 +10,7 @@ import DetailPage from '../components/pages/Detailpage';
 import ProfilePage from '../components/pages/Profilepage';
 import { AuthProvider } from '../context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import 'react-toastify/dist/ReactToastify.css';
 import Footer from '../components/layouts/Footer';
 
 const Layout = ({ children }) => (
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
 
 const AppRoutes = () => (
   <AuthProvider>
-      <Toaster position="top-center" reverseOrder={false} />
+  <Toaster position="top-center" autoClose={3000} />
       <RouterProvider router={router} />
   </AuthProvider>
 );

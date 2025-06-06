@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import cleaned_data from '../../data/data_forDB_pretty.json';
 import { DetailTemplate } from '../templates/DetailTemplate';
+import toast from 'react-hot-toast';
 
 const haversineDistance = (coords1, coords2) => {
   const toRad = (value) => (value * Math.PI) / 180;
@@ -75,20 +76,26 @@ const DetailPage = () => {
   const handleStarClick = (rating) => setNewFeedback({ ...newFeedback, rating });
 
   const handleSubmitReview = (e) => {
-    e.preventDefault();
-    if (!isLoggedIn) return navigate('/login');
-    if (!newFeedback.comment.trim() || newFeedback.rating === 0) return;
-    const review = {
-      id: `review-${Date.now()}`,
-      name: user?.name || 'Anonymous',
-      rating: newFeedback.rating,
-      comment: newFeedback.comment.trim(),
-      timestamp: new Date().toISOString()
-    };
-    setFeedbacks([review, ...feedbacks]);
-    setNewFeedback({ rating: 0, comment: '' });
-    swiperRef.current?.slideTo(0);
+  e.preventDefault();
+  if (!isLoggedIn) return navigate('/login');
+  if (!newFeedback.comment.trim() || newFeedback.rating === 0) return;
+
+  const review = {
+    id: `review-${Date.now()}`,
+    name: user?.name || 'Anonymous',
+    rating: newFeedback.rating,
+    comment: newFeedback.comment.trim(),
+    timestamp: new Date().toISOString()
   };
+
+  setFeedbacks([review, ...feedbacks]);
+  setNewFeedback({ rating: 0, comment: '' });
+  swiperRef.current?.slideTo(0);
+
+  // ✅ Tambahkan notifikasi berhasil
+  toast.success('Review submitted successfully!');
+};
+
 
   const handleEditClick = useCallback((review) => {
     setSelectedReview(review);
