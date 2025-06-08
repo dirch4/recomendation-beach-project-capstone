@@ -58,7 +58,7 @@ const Homepage = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={() => setDropdownVisible(true)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Find your dream destination..."
+                placeholder="Find your dream beach..."
                 className="w-full px-4 py-3 pr-24 text-black rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
               />
               <button
@@ -94,47 +94,80 @@ const Homepage = () => {
       </section>
 
       {/* About Section */}
-      <section className="bg-[#dcefff] py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
-        <h3 className="text-3xl font-bold mb-10 text-center text-gray-800 flex items-center justify-center gap-2">
-          <Info className="w-8 h-8 text-sky-600" />
+      <section className="bg-gradient-to-b from-sky-50 to-white py-24 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <h3 className="text-4xl font-extrabold mb-16 text-center text-gray-800 flex items-center justify-center gap-3">
+          <Info className="w-10 h-10 text-sky-600" />
           About This Website
         </h3>
-
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 text-gray-800">
-          <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-transform hover:scale-[1.04]">
-            <h4 className="text-xl font-semibold mb-4 text-sky-700">Why this project?</h4>
-            <p className="text-justify text-lg leading-relaxed">
-              Indonesia has thousands of beautiful beaches, but finding one that matches your personal preferences
-              (quiet, clean, crowded, etc.) can be a challenge. Tourists often rely on viral trends
-              instead of authentic, personalized reviews.
-            </p>
+                  
+        <div className="max-w-6xl mx-auto flex flex-col gap-16">
+          {/* Why This Project */}
+          <div className="flex flex-col md:flex-row items-center gap-10 group">
+            <div className="md:w-1/2">
+              <img
+                src="https://undraw.co/api/illustrations/focused_work.svg"
+                alt="why"
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="md:w-1/2 bg-white p-8 rounded-2xl shadow-xl border-l-4 border-sky-500 transition-transform group-hover:scale-[1.02]">
+              <h4 className="text-2xl font-bold mb-4 text-sky-700 flex items-center gap-2">
+                <Info className="w-6 h-6" />
+                Why This Project?
+              </h4>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Indonesia has thousands of beautiful beaches, but finding one that matches your personal preferences can be tricky.
+                This project helps tourists explore hidden gems through review analysis and personalized filtering — not just trends.
+              </p>
+            </div>
           </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-transform hover:scale-[1.04]">
-            <h4 className="text-xl font-semibold mb-4 text-sky-700">What is the goal?</h4>
-            <p className="text-justify text-lg leading-relaxed">
-              This system uses machine learning (TensorFlow) to recommend beaches based on user reviews
-              and metadata such as ratings, tags, and crowd levels. The goal is to make beach discovery
-              more personal and data-driven.
-            </p>
+                  
+          {/* Goal */}
+          <div className="flex flex-col md:flex-row-reverse items-center gap-10 group">
+            <div className="md:w-1/2">
+              <img
+                src="https://undraw.co/api/illustrations/data_processing.svg"
+                alt="goal"
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="md:w-1/2 bg-white p-8 rounded-2xl shadow-xl border-r-4 border-emerald-500 transition-transform group-hover:scale-[1.02]">
+              <h4 className="text-2xl font-bold mb-4 text-emerald-700 flex items-center gap-2">
+                🎯 What Is the Goal?
+              </h4>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                This platform uses machine learning to recommend beaches based on user reviews and metadata such as ratings and tags.
+                Our goal is to deliver a smarter, more personalized discovery experience for beach lovers.
+              </p>
+            </div>
           </div>
-
-          <div className="md:col-span-2 bg-sky-100 p-6 rounded-2xl shadow-md transition-transform hover:scale-[1.04]">
-            <h4 className="text-xl font-semibold mb-3 text-center text-sky-800">
-              🎯 Research Question
-            </h4>
-            <p className="text-center text-lg italic text-gray-700">
+                  
+          {/* Research Question */}
+          <div className="text-center bg-sky-100 p-10 rounded-2xl shadow-md border border-sky-300">
+            <h4 className="text-2xl font-semibold text-sky-800 mb-4">💡 Research Question</h4>
+            <p className="text-lg italic text-gray-800 max-w-3xl mx-auto">
               “How to build a relevant and personalized beach recommendation system for users based on review data and beach metadata?”
             </p>
           </div>
-
-          <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-transform hover:scale-[1.04]">
-            <h4 className="text-xl font-semibold mb-4 text-sky-700">Design & Methodology</h4>
-            <p className="text-justify text-lg leading-relaxed">
-              Built through a design thinking process — identifying user needs, prototyping,
-              and iteratively improving. The system analyzes review keywords and uses filtering
-              based on crowd levels, ratings, and personal preferences to match the right beach for the right user.
-            </p>
+                  
+          {/* Design & Methodology */}
+          <div className="flex flex-col md:flex-row items-center gap-10 group">
+            <div className="md:w-1/2">
+              <img
+                src="https://undraw.co/api/illustrations/design_process.svg"
+                alt="method"
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="md:w-1/2 bg-white p-8 rounded-2xl shadow-xl border-l-4 border-purple-500 transition-transform group-hover:scale-[1.02]">
+              <h4 className="text-2xl font-bold mb-4 text-purple-700 flex items-center gap-2">
+                🧩 Design & Methodology
+              </h4>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Built using a design thinking approach — this system identifies user needs, prototypes ideas, and iterates.
+                The recommendation engine analyzes keywords, crowd levels, and other metadata to match the right beach to the right user.
+              </p>
+            </div>
           </div>
         </div>
       </section>

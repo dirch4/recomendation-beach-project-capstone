@@ -5,14 +5,14 @@ export const ReviewForm = ({ isLoggedIn, newFeedback, setNewFeedback, onSubmit, 
   <form onSubmit={onSubmit} className="max-w-2xl mx-auto">
     <div className="flex justify-center space-x-2 mb-6">
       {[1, 2, 3, 4, 5].map((star) => (
-        <button
+        <Button
           type="button"
           key={star}
           className={`text-4xl ${newFeedback.rating >= star ? 'text-yellow-500' : 'text-gray-300'}`}
           onClick={() => onStarClick(star)}
         >
           ★
-        </button>
+        </Button>
       ))}
     </div>
 

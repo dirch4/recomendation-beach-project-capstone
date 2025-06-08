@@ -50,7 +50,7 @@ const router = createBrowserRouter([
 
 const AppRoutes = () => (
   <AuthProvider>
-  <Toaster position="top-center" autoClose={3000} />
+  <Toaster position="top-center" reverseOrder={false}/>
       <RouterProvider router={router} />
   </AuthProvider>
 );

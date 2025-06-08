@@ -125,6 +125,24 @@ const SearchPage = () => {
     setDisplayCount((prev) => prev + 6);
   };
 
+  const handleNearbySearch = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        window.location.href = `/search?nearby=true&lat=${lat}&lon=${lon}`;
+      },
+      (error) => {
+        alert("Failed to get your location.");
+      }
+    );
+  };
+
   return (
     <div className="px-4 md:px-6 lg:px-8 py-6 bg-inherit w-full max-w-screen-lg mx-auto">
       <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6">
@@ -137,7 +155,7 @@ const SearchPage = () => {
         )}
       </h1>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
         <input
           type="text"
           placeholder="Search for beach or location..."
@@ -157,6 +175,14 @@ const SearchPage = () => {
           <option value={4}>Minimum 4.0</option>
           <option value={4.5}>Minimum 4.5</option>
         </select>
+        {!isNearby && (
+          <button
+            onClick={handleNearbySearch}
+            className="p-3 bg-sky-800 text-sky-200 rounded-md text-sm md:text-base hover:bg-sky-600 transition whitespace-nowrap"
+          >
+            Find Nearby
+          </button>
+        )}
       </div>
 
       {!debouncedTerm && !isNearby && (
@@ -262,7 +288,7 @@ const Card = ({ place }) => {
             </a>
             <a
               href={`/detail/${place.place_id}`}
-              className="bg-[#00859D] text-white text-sm px-6 py-2 rounded-md hover:bg-sky-700 transition w-40 text-center"
+              className="bg-[#00859B] text-white text-sm px-6 py-2 rounded-md hover:bg-[#016577] transition w-40 text-center"
             >
               Details
             </a>
@@ -270,30 +296,21 @@ const Card = ({ place }) => {
         </div>
       </div>
 
+      {/* Modal for image preview */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
           onClick={() => setModalOpen(false)}
         >
-          <div className="relative max-w-3xl w-full p-4">
-            <img
-              src={place.featured_image?.[0]}
-              alt="Full Size"
-              className="rounded-lg max-h-[90vh] w-full object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <button
-              className="absolute top-2 right-2 text-white bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full px-3 py-1"
-              onClick={() => setModalOpen(false)}
-            >
-              ✕
-            </button>
-          </div>
+          <img
+            src={place.featured_image?.[0]}
+            alt={place.place_name}
+            className="max-w-full max-h-full rounded-lg shadow-lg"
+          />
         </div>
       )}
     </>
   );
 };
-
 
 export default SearchPage;

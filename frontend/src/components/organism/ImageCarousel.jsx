@@ -28,7 +28,7 @@ export const ImageCarousel = ({ images, placeName, swiperRef }) => (
           <img
             src={url}
             alt={`${placeName} - Image ${index + 1}`}
-            className="w-full h-full object-cover rounded-xl"
+            className="w-full h-[350px] max-h-[400px] object-cover rounded-xl"
             onError={(e) => { e.target.src = '/placeholder-image.jpg'; }}
           />
         </SwiperSlide>

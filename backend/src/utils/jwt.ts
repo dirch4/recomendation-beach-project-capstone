@@ -7,6 +7,8 @@ export const generateToken = (user: { id: string; email: string; name: string })
 };
 
 export const verifyToken = (token: string): { id: string; email: string; name: string } | null => {
+
+  
   try {
     const decoded = jwt.verify(token, SECRET_KEY) as { id: string; email: string; name: string };
     return decoded;
@@ -14,3 +16,4 @@ export const verifyToken = (token: string): { id: string; email: string; name: s
     return null;
   }
 };
+

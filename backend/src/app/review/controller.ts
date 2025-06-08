@@ -20,10 +20,13 @@ router.post(
   authenticateJWT, // Assuming base path like /api/reviews/ is handled in app.ts
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+      console.log("req.user:", req.user);
       if (!req.user || !req.user.id) {
         // This check is crucial for this route
         throw new BadRequestError("User not authenticated.");
       }
+
+      console.log("RECEIVED BODY", req.body);
 
       const validatedData = ReviewInputSchema.parse(req.body);
       const { placeId, rating, review_text } = validatedData;
@@ -48,6 +51,7 @@ router.post(
         Array.isArray(error.issues) &&
         error.issues.length > 0
       ) {
+        console.error("🔥 Zod validation failed with issues:", error.issues);
         return next(
           new BadRequestError(`Validation Error: ${error.issues[0].message}`)
         );

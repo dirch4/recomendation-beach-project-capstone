@@ -2,7 +2,7 @@ import { StarRating } from '../atoms/StarRating';
 import { Button } from '../atoms/Button';
 
 export const ReviewCard = ({ feedback, isOwner, onEdit, onDelete, isOpen, onToggleDropdown }) => (
-  <div className="bg-white border p-6 rounded-md shadow-md h-[220px] flex flex-col justify-between relative">
+  <div className="bg-white border p-6 rounded-md shadow-lg h-[220px] flex flex-col justify-between relative">
     {isOwner && (
       <div className="absolute top-4 right-4 z-10">
         <button onClick={onToggleDropdown} className="text-gray-500 hover:text-gray-800 text-xl font-bold">&#x22EF;</button>

@@ -139,7 +139,7 @@ export default function ProfilePage() {
             onClick={() => navigate(-1)}
             className="px-4 py-2 text-sky-900 rounded hover:text-sky-600 transition text-2xl font-semibold"
           >
-            ← Back
+            Back
           </button>
           <div className="w-2 h-6 bg-blue-600 rounded"></div>
           <h1 className="text-2xl font-semibold text-sky-900">Profile</h1>

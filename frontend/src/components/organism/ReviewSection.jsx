@@ -2,6 +2,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import { ReviewCard } from '../layouts/ReviewCard';
+import axios from 'axios';
+import { useState,useEffect,useRef } from 'react';
 
 export const ReviewsSection = ({ feedbacks, isLoggedIn, user, openDropdownId, setOpenDropdownId, handleEditClick, handleDeleteClick, swiperRef }) => (
   <section className="max-w-6xl mx-auto py-10 px-6 bg-white mt-10 rounded-md shadow-md">
@@ -22,7 +24,7 @@ export const ReviewsSection = ({ feedbacks, isLoggedIn, user, openDropdownId, se
         1024: { slidesPerView: 3 },
       }}
       onSwiper={(swiper) => (swiperRef.current = swiper)}
-      className="mySwiper cursor-pointer shadow-lg"
+      className="mySwiper cursor-pointer"
     >
       {feedbacks.length === 0 ? (
         <SwiperSlide>

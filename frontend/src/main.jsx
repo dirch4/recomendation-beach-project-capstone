@@ -4,11 +4,14 @@ import AppRoutes from './routes';
 import './index.css';
 import Navbar from './components/layouts/Navbar';
 import { AuthProvider } from './context/AuthContext';
+import { SearchProvider } from './context/SearchContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider> 
-      <AppRoutes />
-    </AuthProvider>
+    <SearchProvider>
+      <AuthProvider> 
+        <AppRoutes />
+      </AuthProvider>
+    </SearchProvider>
   </React.StrictMode>
 );
