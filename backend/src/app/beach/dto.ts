@@ -27,6 +27,10 @@ export interface BeachDetail {
   coordinates: string | null;
 }
 
+export interface NearbyBeachDetail extends BeachDetail {
+  distance: number; // Jarak dalam kilometer
+}
+
 // Internal type for service, good to keep co-located or in DTO if widely used
 export type SelectedBeachDetailsForRecommendation = {
   place_Id: string;
